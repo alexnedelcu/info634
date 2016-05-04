@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import info634.alexnedelcu.com.info634.metrics.Metric;
 import info634.alexnedelcu.com.info634.metrics.MetricAvgAccelerationChangePer1Second;
 import info634.alexnedelcu.com.info634.metrics.MetricAvgAccelerationPer1Second;
+import info634.alexnedelcu.com.info634.metrics.MetricAvgRotationRatePer1Second;
 
 /**
  * Created by Alex on 4/26/2016.
@@ -19,6 +20,7 @@ public class SensorRecorder {
 
     private SensorManager mSensorManager;
     private Sensor mAcc;
+    private Sensor mGyro;
     private Context context;
 
     ArrayList<Metric> runningMetrics = new ArrayList<Metric>();
@@ -29,6 +31,7 @@ public class SensorRecorder {
 
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
             mAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            mGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         }
         else{
             // Sorry, there are no accelerometers on your device.
@@ -40,6 +43,7 @@ public class SensorRecorder {
         // add the running metrics to the running metrics array
         runningMetrics.add(new MetricAvgAccelerationPer1Second(context));   // index 0
         runningMetrics.add(new MetricAvgAccelerationChangePer1Second(context));   // index 1
+        runningMetrics.add(new MetricAvgRotationRatePer1Second(context));   //index 2
 
         /**
          * Add more metrics here
@@ -50,6 +54,7 @@ public class SensorRecorder {
     public void recordWalkingMetrics() {
         mSensorManager.registerListener(runningMetrics.get(0), mAcc, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(runningMetrics.get(1), mAcc, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(runningMetrics.get(2), mGyro, SensorManager.SENSOR_DELAY_NORMAL);
 
         /**
          * Add more metrics here
