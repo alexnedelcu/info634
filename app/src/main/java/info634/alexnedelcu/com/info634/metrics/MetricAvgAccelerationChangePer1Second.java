@@ -18,61 +18,60 @@ public class MetricAvgAccelerationChangePer1Second extends Metric {
     public MetricAvgAccelerationChangePer1Second(Context context) {
         super(context);
 
-        new Thread(new Runnable () {
-            public void run () {
-                try {
-                    while (true) {
+    }
+    float x,y,z;
 
-                        Thread.currentThread().sleep(1000);
+    @Override
+    public MetricObj getNewMetric() {
+        lock.lock();
 
-                        lock.lock();
+        // creating the metric by taking the average of the values
+        double avg = 0.0;
+        for (int i = 0; i < n; i++) {
+            avg += Math.abs(valuesX[i]) + Math.abs(valuesY[i]) + Math.abs(valuesZ[i]);
+        }
+        avg = avg / n;
 
-                        // creating the metric by taking the average of the values
-                        float avg = 0;
-                        for (int i = 0; i < n; i++) {
-                            avg += Math.abs(valuesX[i]) + Math.abs(valuesY[i]) + Math.abs(valuesZ[i]);
-                        }
-                        avg = avg / n;
+        MetricObj metric = new MetricObj(n, avg);
 
-                        addToLog("Avg acc change/sec: " + avg);
-                        Log.i("Avg acc change/sec: ", "" + avg + "  ("+n+" values averaged)");
+        Log.i("metric", avg + " " + n);
 
+        n = 0;
+        lock.unlock();
 
-                        n = 0;
-
-                        lock.unlock();
-
-                        metrics.add(String.valueOf(avg));
-
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+        return metric;
     }
 
-    float x,y,z;
+    @Override
+    public void clearData() {
+        lock.lock();
+        n=0;
+        lock.unlock();
+    }
+
     public void onSensorChanged(SensorEvent event) {
+        if (state == State.ACTIVE) {
 
-        if (x == 0 && y == 0 && z == 0) {
-            x=event.values[0];
-            y=event.values[1];
-            z=event.values[2];
-        } else {
-            lock.lock();
+            if (x == 0 && y == 0 && z == 0) {
+                x = event.values[0];
+                y = event.values[1];
+                z = event.values[2];
+            } else {
+                lock.lock();
 
-            valuesX[n] = event.values[0]-x;
-            valuesY[n] = event.values[1]-y;
-            valuesZ[n++] = event.values[2]-z;
+                valuesX[n] = event.values[0] - x;
+                valuesY[n] = event.values[1] - y;
+                valuesZ[n++] = event.values[2] - z;
 
-            // update the last values of x,y,z
-            x=event.values[0];
-            y=event.values[1];
-            z=event.values[2];
+                // update the last values of x,y,z
+                x = event.values[0];
+                y = event.values[1];
+                z = event.values[2];
 
-            lock.unlock();
+                lock.unlock();
+            }
         }
+
     }
 
 }

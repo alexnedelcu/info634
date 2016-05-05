@@ -34,16 +34,10 @@ public class MetricAvgAccelerationPer1Second extends Metric {
                         }
                         avg = avg / n;
 
-                        addToLog("Avg acc/s: " + avg);
-                        Log.i("Avg acc/s: ", "" + avg + "  ("+n+" values averaged)");
-
-
                         n = 0;
-
                         lock.unlock();
 
                         metrics.add(String.valueOf(avg));
-
 
                     }
                 } catch (InterruptedException e) {
@@ -51,6 +45,18 @@ public class MetricAvgAccelerationPer1Second extends Metric {
                 }
             }
         }).start();
+    }
+
+    @Override
+    public MetricObj getNewMetric() {
+        return null;
+    }
+
+    @Override
+    public void clearData() {
+        lock.lock();
+        n=0;
+        lock.unlock();
     }
 
     public void onSensorChanged(SensorEvent event) {

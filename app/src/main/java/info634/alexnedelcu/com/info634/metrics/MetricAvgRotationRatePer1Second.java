@@ -30,11 +30,11 @@ public class MetricAvgRotationRatePer1Second extends Metric {
                         Thread.currentThread().sleep(1000);
                         lock.lock();
 
-                            addToLog("axisX: " + axisX);
+                            //addToLog("axisX: " + axisX);
                             Log.i("axisX: ", "" + axisX);
-                            addToLog("axisY: " + axisY);
+                            //addToLog("axisY: " + axisY);
                             Log.i("axisY: ", "" + axisY);
-                            addToLog("axisZ: " + axisZ);
+                            //addToLog("axisZ: " + axisZ);
                             Log.i("axisZ: ", "" + axisZ);
 
                         lock.unlock();
@@ -49,6 +49,17 @@ public class MetricAvgRotationRatePer1Second extends Metric {
 
 
     }
+
+    @Override
+    public MetricObj getNewMetric() {
+        return null;
+    }
+
+    @Override
+    public void clearData() {
+
+    }
+
     public void onSensorChanged(SensorEvent event) {
         // This timestep's delta rotation to be multiplied by the current rotation
         // after computing it from the gyro sample data.
