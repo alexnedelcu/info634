@@ -1,8 +1,8 @@
 package info634.alexnedelcu.com.info634;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
@@ -10,9 +10,13 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,18 +30,10 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
-        Log.i("MainActivity", "initializing main");
-        System.out.println("initializing main");
+        final Spinner spnAction = (Spinner) findViewById(R.id.spnAction);
 
-        sr = new SensorRecorder(this);
+
+        sr = new SensorRecorder(this,  spnAction.getSelectedItem().toString());
         sr.setLoggingProcedure(new SensorRecorder.Command() {
             @Override
             public void execute(final String s) {
@@ -90,46 +86,69 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void implementOnClickActions() {
-        final Button btnRunStart = (Button) findViewById(R.id.btnStartRun);
-        final Button btnRunStop = (Button) findViewById(R.id.btnPauseRun);
-        final Button btnWalkStart = (Button) findViewById(R.id.btnStartWalk);
-        final Button btnWalkStop = (Button) findViewById(R.id.btnPauseWalk);
-        final Button btnBikeStart = (Button) findViewById(R.id.btnStartBike);
-        final Button btnBikeStop = (Button) findViewById(R.id.btnPauseBike);
+        final Button btnStart = (Button) findViewById(R.id.btnStart);
+        final Button btnStop = (Button) findViewById(R.id.btnPause);
+        final Button btnSend = (Button) findViewById(R.id.btnSend);
+        final Button btnClear = (Button) findViewById(R.id.btnClear);
         final SeekBar seekBarInterval = (SeekBar) findViewById(R.id.seekInterval);
+        final Spinner spnAction = (Spinner) findViewById(R.id.spnAction);
 
 
 
-        btnRunStart.setOnClickListener(new View.OnClickListener() {
+        btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 sr.startRunning(interval);
-                btnRunStop.setEnabled(true);
+                btnStop.setEnabled(true);
 
-                btnRunStart.setEnabled(false);
-                btnWalkStart.setEnabled(false);
-                btnWalkStop.setEnabled(false);
-                btnBikeStart.setEnabled(false);
-                btnBikeStop.setEnabled(false);
+                btnStart.setEnabled(false);
+                btnSend.setEnabled(false);
                 seekBarInterval.setEnabled(false);
             }
         });
 
-        btnRunStop.setOnClickListener(new View.OnClickListener() {
+        btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 sr.pauseRunning();
 
-                btnRunStart.setEnabled(true);
-                btnWalkStart.setEnabled(true);
-                btnBikeStart.setEnabled(true);
-
-                btnWalkStop.setEnabled(false);
-                btnRunStop.setEnabled(false);
-                btnBikeStop.setEnabled(false);
-
+                btnStart.setEnabled(true);
+                btnSend.setEnabled(true);
+                btnStop.setEnabled(false);
                 seekBarInterval.setEnabled(true);
+            }
+        });
 
+        btnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent sendIntent = new Intent(Intent.ACTION_VIEW);
+                sendIntent.setType("plain/text");
+                sendIntent.setData(Uri.parse("silberquitr@gmail.com"));
+                sendIntent.setClassName("com.google.android.gm", "com.google.android.gm.ComposeActivityGmail");
+                sendIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"ialexandru.nedelcu@gmail.com"});
+                sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Log " + new Date());
+                sendIntent.putExtra(Intent.EXTRA_TEXT, sr.getCSV());
+                startActivity(sendIntent);
+            }
+        });
+
+        btnClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sr.clear();
+            }
+        });
+
+        spnAction.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                sr.setLabel(spnAction.getSelectedItem().toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                return;
             }
         });
     }

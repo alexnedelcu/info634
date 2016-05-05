@@ -17,90 +17,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Start"
-        android:id="@+id/btnStartRun"
+        android:id="@+id/btnStart"
         android:layout_below="@+id/seekInterval"
-        android:layout_toLeftOf="@+id/btnPauseRun"
-        android:layout_toStartOf="@+id/btnPauseRun" />
+        android:layout_toLeftOf="@+id/btnPause"
+        android:layout_toStartOf="@+id/btnPause" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Pause"
-        android:id="@+id/btnPauseRun"
+        android:id="@+id/btnPause"
         android:layout_below="@+id/seekInterval"
-        android:layout_alignLeft="@+id/btnPauseWalk"
-        android:layout_alignStart="@+id/btnPauseWalk" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Run"
-        android:id="@+id/textView"
-        android:layout_alignTop="@+id/btnStartRun"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignBottom="@+id/btnStartRun" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Walk"
-        android:id="@+id/textView2"
-        android:layout_below="@+id/btnStartRun"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start"
-        android:id="@+id/btnStartWalk"
-        android:layout_below="@+id/btnStartRun"
-        android:layout_alignLeft="@+id/btnStartRun"
-        android:layout_alignStart="@+id/btnStartRun" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Pause"
-        android:id="@+id/btnPauseWalk"
-        android:layout_below="@+id/btnStartRun"
         android:layout_centerHorizontal="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Bike"
-        android:id="@+id/textView3"
-        android:layout_below="@+id/btnStartWalk"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start"
-        android:id="@+id/btnStartBike"
-        android:layout_below="@+id/btnStartWalk"
-        android:layout_alignLeft="@+id/btnStartWalk"
-        android:layout_alignStart="@+id/btnStartWalk" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Pause"
-        android:id="@+id/btnPauseBike"
-        android:layout_below="@+id/btnStartWalk"
-        android:layout_alignLeft="@+id/btnPauseWalk"
-        android:layout_alignStart="@+id/btnPauseWalk" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -112,7 +41,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:scrollbars = "vertical"
-        android:layout_below="@+id/btnStartBike" />
+        android:layout_below="@+id/btnStart" />
 
     <SeekBar
         android:layout_width="match_parent"
@@ -136,5 +65,37 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send"
+        android:id="@+id/btnSend"
+        android:layout_alignBottom="@+id/btnPause"
+        android:layout_toRightOf="@+id/btnPause"
+        android:layout_toEndOf="@+id/btnPause" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Clear"
+        android:id="@+id/btnClear"
+        android:layout_below="@+id/seekInterval"
+        android:layout_toRightOf="@+id/btnSend"
+        android:layout_toEndOf="@+id/btnSend" />
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/spnAction"
+        android:spinnerMode="dropdown"
+        android:layout_below="@+id/seekInterval"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_toLeftOf="@+id/btnStart"
+        android:entries="@array/possibleActions"
+        android:layout_toStartOf="@+id/btnStart" />
 
 </RelativeLayout>

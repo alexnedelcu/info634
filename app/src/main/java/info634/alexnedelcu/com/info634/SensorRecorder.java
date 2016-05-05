@@ -30,15 +30,17 @@ public class SensorRecorder {
     private enum UserActivity {RUNNING, WALKING, BIKING};
     UserActivity userActivity;
     private boolean looping = false;
-    private String csv; // holds the temp CSV. Can be saved if the user presses the button to save.
+    private String csv=""; // holds the temp CSV. Can be saved if the user presses the button to save.
     private static String log="";
     static SensorRecorder.Command logUpdatingProcedure;
+    private static String label;
 
 
     ArrayList<Metric> runningMetrics = new ArrayList<Metric>();
 
-    public SensorRecorder (Context context) {
+    public SensorRecorder (Context context, String label) {
         this.context = context;
+        this.label = label;
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
 
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
@@ -87,16 +89,17 @@ public class SensorRecorder {
         for (int i=0; i<runningMetrics.size(); i++) {
             runningMetrics.get(i).resumeRecording();
         }
-        csv = "";
         startLoop();
     }
 
-    public void saveRunningData() {
-        IO.save(csv, "running.csv");
+    public String getCSV() {
+        return csv;
     }
 
-    public void removeRunningData() {
-        IO.remove("running.csv");
+    public void clear() {
+        csv = "";
+        log = "";
+        addToLog("");
     }
 
     public void setLoggingProcedure(Command c) {
@@ -131,7 +134,7 @@ public class SensorRecorder {
                         String log = "";
                         log = ""+time;
 
-                        csvInstance += time;
+                        csvInstance = time+","+label.toUpperCase();
 
 
                         for (int i = 0; i < runningMetrics.size(); i++) { // iterate through all the classes that output metrics
@@ -162,6 +165,10 @@ public class SensorRecorder {
         log = s + log;
 
         logUpdatingProcedure.execute(log);
+    }
+
+    public static void setLabel(String lbl) {
+        label = lbl;
     }
 
     public static void clearLog () {
