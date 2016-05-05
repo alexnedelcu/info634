@@ -20,10 +20,6 @@ public class MetricAvgRotationRatePer1Second extends Metric {
     float axisY = 1000;
     float axisZ = 1000;
 
-    public MetricAvgRotationRatePer1Second(Context context){
-        super(context);
-    }
-
     @Override
     public MetricObj getNewMetric() {
         ArrayList<Double> metrics = new ArrayList<Double>();

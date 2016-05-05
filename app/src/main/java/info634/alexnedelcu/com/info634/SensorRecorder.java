@@ -24,40 +24,32 @@ public class SensorRecorder {
     private SensorManager mSensorManager;
     private Sensor mAcc;
     private Sensor mGyro;
-    private Context context;
     private Thread loop;
     private int loopingInterval = 1000;
-    private enum UserActivity {RUNNING, WALKING, BIKING};
-    UserActivity userActivity;
     private boolean looping = false;
     private String csv=""; // holds the temp CSV. Can be saved if the user presses the button to save.
     private static String log="";
     static SensorRecorder.Command logUpdatingProcedure;
-    private static String label;
+    private static String classificationLabel;
 
 
     ArrayList<Metric> runningMetrics = new ArrayList<Metric>();
 
     public SensorRecorder (Context context, String label) {
-        this.context = context;
-        this.label = label;
+        this.classificationLabel = label;
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
 
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
             mAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             mGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         }
-        else{
-            // Sorry, there are no accelerometers on your device.
-            // You can't play this game.
-        }
 
         createLoop();
 
         // add the running metrics to the running metrics array
-        runningMetrics.add(new MetricAvgAccelerationChangePer1Second(context));   // index 0
-        runningMetrics.add(new MetricAvgAccelerationPer1Second(context));   // index 1
-        runningMetrics.add(new MetricAvgRotationRatePer1Second(context));   //index 2
+        runningMetrics.add(new MetricAvgAccelerationChangePer1Second());   // index 0
+        runningMetrics.add(new MetricAvgAccelerationPer1Second());   // index 1
+        runningMetrics.add(new MetricAvgRotationRatePer1Second());   //index 2
 
         /**
          * Add more metrics here
@@ -65,7 +57,7 @@ public class SensorRecorder {
 
     }
 
-    public void recordWalkingMetrics() {
+    public void recordMetrics() {
         mSensorManager.registerListener(runningMetrics.get(0), mAcc, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(runningMetrics.get(1), mAcc, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(runningMetrics.get(2), mGyro, SensorManager.SENSOR_DELAY_NORMAL);
@@ -75,7 +67,7 @@ public class SensorRecorder {
          */
     }
 
-    public void pauseRunning () {
+    public void pause() {
         stopLoop();
 
         for (int i=0; i<runningMetrics.size(); i++) {
@@ -83,9 +75,8 @@ public class SensorRecorder {
         }
     }
 
-    public void startRunning(int interval) {
+    public void start(int interval) {
         loopingInterval = interval;
-        userActivity = UserActivity.RUNNING;
         for (int i=0; i<runningMetrics.size(); i++) {
             runningMetrics.get(i).resumeRecording();
         }
@@ -132,9 +123,9 @@ public class SensorRecorder {
 
                         long time = new Date().getTime()/1000%1000;
                         String log = "";
-                        log = ""+time;
+                        log = ""+time+"  "+classificationLabel.substring(0,1).toUpperCase();
 
-                        csvInstance = time+","+label.toUpperCase();
+                        csvInstance = time+","+classificationLabel.toUpperCase();
 
 
                         for (int i = 0; i < runningMetrics.size(); i++) { // iterate through all the classes that output metrics
@@ -143,7 +134,7 @@ public class SensorRecorder {
                                 // if there are  multiple metrics logged by one class, iterate through them
                                 for (int j=0; j<m.metric.size(); j++) {
                                     csvInstance += "," + m.metric.get(j);
-                                    log += ("   " + m.metric.get(j)).substring(0, 8);
+                                    log += ("  " + m.metric.get(j)).substring(0, 8);
                                 }
                             }
                         }
@@ -168,12 +159,7 @@ public class SensorRecorder {
     }
 
     public static void setLabel(String lbl) {
-        label = lbl;
-    }
-
-    public static void clearLog () {
-        log = "";
-        logUpdatingProcedure.execute(log);
+        classificationLabel = lbl;
     }
 
     public interface Command {

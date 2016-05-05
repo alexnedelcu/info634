@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        sr.recordWalkingMetrics();
+        sr.recordMetrics();
 
         implementOnClickActions();
 
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sr.startRunning(interval);
+                sr.start(interval);
                 btnStop.setEnabled(true);
 
                 btnStart.setEnabled(false);
@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sr.pauseRunning();
+                sr.pause();
 
                 btnStart.setEnabled(true);
                 btnSend.setEnabled(true);

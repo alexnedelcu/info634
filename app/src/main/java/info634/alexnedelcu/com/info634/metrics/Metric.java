@@ -27,11 +27,7 @@ public abstract class Metric extends MainActivity implements SensorEventListener
     protected static enum State {ACTIVE, INACTIVE};
     protected static State state;
 
-    Context context;
-    static String label;
-
-    public Metric (Context context) {
-        this.context = context;
+    public Metric () {
         metrics = new LinkedList<String>();
         state = State.INACTIVE;
     }
@@ -41,26 +37,7 @@ public abstract class Metric extends MainActivity implements SensorEventListener
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {};
 
-    public void saveData () {
-
-        FileOutputStream outputStream;
-
-        try {
-            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-            while (!metrics.isEmpty()) {
-                outputStream.write((metrics.poll() + "\n").getBytes());
-            }
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public abstract void clearData();
-
-    public void setLabel(String label) {
-        this.label = label;
-    }
 
     public void pauseRecording() { state=State.INACTIVE; clearData(); }
 

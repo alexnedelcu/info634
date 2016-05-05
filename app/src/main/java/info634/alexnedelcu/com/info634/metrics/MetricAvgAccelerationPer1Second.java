@@ -13,11 +13,7 @@ public class MetricAvgAccelerationPer1Second extends Metric {
     float[] valuesX = new float[1000];
     float[] valuesY = new float[1000];
     float[] valuesZ = new float[1000];
-    int n=0;
-
-    public MetricAvgAccelerationPer1Second(Context context) {
-        super(context);
-    }
+    volatile int n=0;
 
     @Override
     public MetricObj getNewMetric() {
