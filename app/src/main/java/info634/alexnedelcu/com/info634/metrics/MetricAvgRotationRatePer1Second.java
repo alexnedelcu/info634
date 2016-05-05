@@ -6,6 +6,7 @@ import android.hardware.SensorManager;
 import android.util.Log;
 
 import java.lang.Math.*;
+import java.util.ArrayList;
 
 /**
  * Created by Ross on 4/30/16.
@@ -21,46 +22,33 @@ public class MetricAvgRotationRatePer1Second extends Metric {
 
     public MetricAvgRotationRatePer1Second(Context context){
         super(context);
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    while (true) {
-                        Thread.currentThread().sleep(1000);
-                        lock.lock();
-
-                            //addToLog("axisX: " + axisX);
-                            Log.i("axisX: ", "" + axisX);
-                            //addToLog("axisY: " + axisY);
-                            Log.i("axisY: ", "" + axisY);
-                            //addToLog("axisZ: " + axisZ);
-                            Log.i("axisZ: ", "" + axisZ);
-
-                        lock.unlock();
-                        metrics.add(String.valueOf(axisX));
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
-
-
     }
 
     @Override
     public MetricObj getNewMetric() {
-        return null;
+        ArrayList<Double> metrics = new ArrayList<Double>();
+
+        metrics.add((double) axisX);
+        metrics.add((double) axisY);
+        metrics.add((double) axisZ);
+
+        MetricObj m = new MetricObj(1, metrics);
+
+        return m;
     }
 
     @Override
     public void clearData() {
-
+        axisX = 1000;
+        axisY = 1000;
+        axisZ = 1000;
     }
 
     public void onSensorChanged(SensorEvent event) {
+        if (state == State.INACTIVE) {
+            return;
+        }
+
         // This timestep's delta rotation to be multiplied by the current rotation
         // after computing it from the gyro sample data.
         if (timestamp != 0) {
@@ -71,7 +59,7 @@ public class MetricAvgRotationRatePer1Second extends Metric {
             axisZ = event.values[2];
 
             // Calculate the angular speed of the sample
-            float d = axisX*axisX + axisY*axisY + axisZ*axisZ;
+            double d = axisX*axisX + axisY*axisY + axisZ*axisZ;
 
             float omegaMagnitude = (float)Math.sqrt(d);
 

@@ -17,39 +17,27 @@ public class MetricAvgAccelerationPer1Second extends Metric {
 
     public MetricAvgAccelerationPer1Second(Context context) {
         super(context);
-
-        new Thread(new Runnable () {
-            public void run () {
-                try {
-                    while (true) {
-
-                        Thread.currentThread().sleep(1000);
-
-                        lock.lock();
-
-                        // creating the metric by taking the average of the values
-                        float avg = 0;
-                        for (int i = 0; i < n; i++) {
-                            avg += Math.sqrt(Math.pow(valuesX[i], 2.0) + Math.pow(valuesY[i], 2.0) + Math.pow(valuesZ[i], 2.0));
-                        }
-                        avg = avg / n;
-
-                        n = 0;
-                        lock.unlock();
-
-                        metrics.add(String.valueOf(avg));
-
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
     }
 
     @Override
     public MetricObj getNewMetric() {
-        return null;
+
+        lock.lock();
+
+        // creating the metric by taking the average of the values
+        double avg = 0;
+        for (int i = 0; i < n; i++) {
+            avg += Math.sqrt(Math.pow(valuesX[i], 2.0) + Math.pow(valuesY[i], 2.0) + Math.pow(valuesZ[i], 2.0));
+        }
+        avg = avg / n;
+
+
+        MetricObj metric = new MetricObj(n, avg);
+
+        n = 0;
+        lock.unlock();
+
+        return metric;
     }
 
     @Override
@@ -60,11 +48,13 @@ public class MetricAvgAccelerationPer1Second extends Metric {
     }
 
     public void onSensorChanged(SensorEvent event) {
-        lock.lock();
-        valuesX[n] = event.values[0];
-        valuesY[n] = event.values[1];
-        valuesZ[n++] = event.values[2];
-        lock.unlock();
+        if (state == State.ACTIVE) {
+            lock.lock();
+            valuesX[n] = event.values[0];
+            valuesY[n] = event.values[1];
+            valuesZ[n++] = event.values[2];
+            lock.unlock();
+        }
     }
 
 }

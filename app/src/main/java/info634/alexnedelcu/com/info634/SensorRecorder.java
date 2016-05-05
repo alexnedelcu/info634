@@ -11,6 +11,8 @@ import java.util.Date;
 
 import info634.alexnedelcu.com.info634.metrics.Metric;
 import info634.alexnedelcu.com.info634.metrics.MetricAvgAccelerationChangePer1Second;
+import info634.alexnedelcu.com.info634.metrics.MetricAvgAccelerationPer1Second;
+import info634.alexnedelcu.com.info634.metrics.MetricAvgRotationRatePer1Second;
 import info634.alexnedelcu.com.info634.metrics.MetricObj;
 
 
@@ -52,8 +54,8 @@ public class SensorRecorder {
 
         // add the running metrics to the running metrics array
         runningMetrics.add(new MetricAvgAccelerationChangePer1Second(context));   // index 0
-        //runningMetrics.add(new MetricAvgAccelerationPer1Second(context));   // index 1
-        //runningMetrics.add(new MetricAvgRotationRatePer1Second(context));   //index 2
+        runningMetrics.add(new MetricAvgAccelerationPer1Second(context));   // index 1
+        runningMetrics.add(new MetricAvgRotationRatePer1Second(context));   //index 2
 
         /**
          * Add more metrics here
@@ -63,8 +65,8 @@ public class SensorRecorder {
 
     public void recordWalkingMetrics() {
         mSensorManager.registerListener(runningMetrics.get(0), mAcc, SensorManager.SENSOR_DELAY_NORMAL);
-        //mSensorManager.registerListener(runningMetrics.get(1), mAcc, SensorManager.SENSOR_DELAY_NORMAL);
-        //mSensorManager.registerListener(runningMetrics.get(2), mGyro, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(runningMetrics.get(1), mAcc, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(runningMetrics.get(2), mGyro, SensorManager.SENSOR_DELAY_NORMAL);
 
         /**
          * Add more metrics here
@@ -132,16 +134,21 @@ public class SensorRecorder {
                         csvInstance += time;
 
 
-                        for (int i = 0; i < runningMetrics.size(); i++) {
+                        for (int i = 0; i < runningMetrics.size(); i++) { // iterate through all the classes that output metrics
                             MetricObj m = runningMetrics.get(i).getNewMetric();
                             if (m.numValues > 0) {
-                                csvInstance += "," + m.metric;
-                                log +=("   " + m.metric).substring(0, 8);
+                                // if there are  multiple metrics logged by one class, iterate through them
+                                for (int j=0; j<m.metric.size(); j++) {
+                                    csvInstance += "," + m.metric.get(j);
+                                    log += ("   " + m.metric.get(j)).substring(0, 8);
+                                }
                             }
                         }
-                        addToLog(log + "\n");
 
-                        csv += csvInstance + "\n";
+                        if (looping) {
+                            addToLog(log + "\n");
+                            csv += csvInstance + "\n";
+                        }
 
                     } catch (InterruptedException e) {
                         e.printStackTrace();
