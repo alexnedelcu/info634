@@ -79,7 +79,8 @@ public class SensorRecorder {
         }
     }
 
-    public void startRunning() {
+    public void startRunning(int interval) {
+        loopingInterval = interval;
         userActivity = UserActivity.RUNNING;
         for (int i=0; i<runningMetrics.size(); i++) {
             runningMetrics.get(i).resumeRecording();

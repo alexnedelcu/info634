@@ -11,11 +11,13 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
     SensorRecorder sr;
+    int interval = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,14 +26,14 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
         Log.i("MainActivity", "initializing main");
         System.out.println("initializing main");
 
@@ -61,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
         sr.recordWalkingMetrics();
 
         implementOnClickActions();
+
+        implementSeekBar();
     }
 
     @Override
@@ -92,12 +96,14 @@ public class MainActivity extends AppCompatActivity {
         final Button btnWalkStop = (Button) findViewById(R.id.btnPauseWalk);
         final Button btnBikeStart = (Button) findViewById(R.id.btnStartBike);
         final Button btnBikeStop = (Button) findViewById(R.id.btnPauseBike);
+        final SeekBar seekBarInterval = (SeekBar) findViewById(R.id.seekInterval);
+
 
 
         btnRunStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sr.startRunning();
+                sr.startRunning(interval);
                 btnRunStop.setEnabled(true);
 
                 btnRunStart.setEnabled(false);
@@ -105,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
                 btnWalkStop.setEnabled(false);
                 btnBikeStart.setEnabled(false);
                 btnBikeStop.setEnabled(false);
+                seekBarInterval.setEnabled(false);
             }
         });
 
@@ -120,7 +127,35 @@ public class MainActivity extends AppCompatActivity {
                 btnWalkStop.setEnabled(false);
                 btnRunStop.setEnabled(false);
                 btnBikeStop.setEnabled(false);
+
+                seekBarInterval.setEnabled(true);
+
             }
         });
+    }
+    public void implementSeekBar() {
+        final SeekBar seekBarInterval = (SeekBar) findViewById(R.id.seekInterval);
+        final TextView txtInterval = (TextView) findViewById(R.id.txtInterval);
+
+        seekBarInterval.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                txtInterval.setText((200 + progress*100) + "ms");
+                interval = (200 + progress*100);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+
     }
 }
