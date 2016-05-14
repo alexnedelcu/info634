@@ -1,9 +1,22 @@
 package info634.alexnedelcu.com.info634;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
+import android.os.Bundle;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.widget.TextView;
 
 import java.lang.Thread;
 import java.util.ArrayList;
@@ -31,11 +44,19 @@ public class SensorRecorder {
     private static String log="";
     static SensorRecorder.Command logUpdatingProcedure;
     private static String classificationLabel;
-
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+    private double lat1 = 0.0;
+    private double lon1 = 0.0;
+    private double lat2 = 0.0;
+    private double lon2 = 0.0;
+    private double distance;
+    private int gpsRefreshRate = 1000; //in milliseconds
+    private double speed;
 
     ArrayList<Metric> runningMetrics = new ArrayList<Metric>();
 
-    public SensorRecorder (Context context, String label) {
+    public SensorRecorder (final Context context, String label) {
         this.classificationLabel = label;
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
 
@@ -54,6 +75,56 @@ public class SensorRecorder {
         /**
          * Add more metrics here
          */
+
+        locationManager = (LocationManager) context.getSystemService(context.LOCATION_SERVICE);
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+               // Log.i("gps location" , location.getLatitude() + " " + location.getLongitude());
+
+                lat2 = location.getLatitude();
+                lon2 = location.getLongitude();
+
+                distance = distance(lat1, lon1, lat2, lon2, "M");
+                speed = distance / (gpsRefreshRate /1000);
+
+                //if (looping) {
+                    //addToLog("gps location" + location.getLatitude() + " " + location.getLongitude() + "\n");
+                    //addToLog("meters: " + lat1 + ","  + lon1 + "," + lat2 + "," + lon2+ "\n");
+                    addToLog("meters: " + distance + " speed m/s: " + speed +"\n");
+                //}
+                lat1 = lat2;
+                lon1 = lon2;
+            }
+
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                 context.startActivity(intent);
+
+            }
+        };
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            /*if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                },10);
+            }*/
+            return;
+        }else{
+            startRecording();
+        }
 
     }
 
@@ -139,6 +210,7 @@ public class SensorRecorder {
                             }
                         }
 
+
                         if (looping) {
                             addToLog(log + "\n");
                             csv += csvInstance + "\n";
@@ -165,4 +237,43 @@ public class SensorRecorder {
     public interface Command {
         public void execute(final String s);
     }
+    protected void callGps() {
+
+    }
+    //@Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case 10:
+                if(grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    startRecording();
+                    return;
+                }
+        }
+    }
+
+    private void startRecording(){
+        locationManager.requestLocationUpdates("gps", gpsRefreshRate, 0, locationListener);
+    }
+
+
+    private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+        if (unit == "K") {
+            dist = dist * 1.609344;
+        } else if (unit == "N") {
+            dist = dist * 0.8684;
+        }
+        return (dist);
+    }
+    private static double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+    private static double rad2deg(double rad) {
+        return (rad * 180 / Math.PI);
+    }
+
 }

@@ -33,8 +33,6 @@ public class MainActivity extends AppCompatActivity {
     SensorRecorder sr;
     int interval = 1000;
 
-    private LocationManager locationManager;
-    private LocationListener locationListener;
 
 
     @Override
@@ -76,62 +74,8 @@ public class MainActivity extends AppCompatActivity {
 
         implementSeekBar();
 
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                final TextView txtLog = (TextView) findViewById(R.id.txtLog);
-                txtLog.setText("\n" +"gps location" + location.getLatitude() + " " + location.getLongitude());
-
-                txtLog.setMovementMethod(new ScrollingMovementMethod()); // make the box scrollable
-                Log.i("gps location" , location.getLatitude() + " " + location.getLongitude());
-            }
-
-            @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String s) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String s) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-
-            }
-        };
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                },10);
-            }
-            return;
-        }else{
-            startRecording();
-        }
-
-        //locationManager.requestLocationUpdates("gps", 5000, 0, locationListener);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode){
-            case 10:
-                    if(grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                        startRecording();
-                   return;
-            }
-        }
-    }
-
-    private void startRecording(){
-        locationManager.requestLocationUpdates("gps", 1000, 0, locationListener);
-    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -173,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
                 btnStart.setEnabled(false);
                 btnSend.setEnabled(false);
                 seekBarInterval.setEnabled(false);
-                startRecording();
             }
         });
 
