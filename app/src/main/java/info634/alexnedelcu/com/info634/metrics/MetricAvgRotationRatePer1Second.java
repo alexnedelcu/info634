@@ -1,17 +1,14 @@
 package info634.alexnedelcu.com.info634.metrics;
 
-import android.content.Context;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
-import android.util.Log;
 
-import java.lang.Math.*;
 import java.util.ArrayList;
 
 /**
  * Created by Ross on 4/30/16.
  */
-public class MetricAvgRotationRatePer1Second extends Metric {
+public class MetricAvgRotationRatePer1Second extends MetricSensorBase {
     private static final float NS2S = 1.0f / 1000000000.0f;
     private final static double EPSILON = 0.00001;
     private final float[] deltaRotationVector = new float[4];
@@ -21,14 +18,14 @@ public class MetricAvgRotationRatePer1Second extends Metric {
     float axisZ = 1000;
 
     @Override
-    public MetricObj getNewMetric() {
+    public MetricDataObj getNewMetric() {
         ArrayList<Double> metrics = new ArrayList<Double>();
 
         metrics.add((double) axisX);
         metrics.add((double) axisY);
         metrics.add((double) axisZ);
 
-        MetricObj m = new MetricObj(1, metrics);
+        MetricDataObj m = new MetricDataObj(1, metrics);
 
         return m;
     }

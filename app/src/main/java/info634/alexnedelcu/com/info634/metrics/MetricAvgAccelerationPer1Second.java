@@ -1,22 +1,18 @@
 package info634.alexnedelcu.com.info634.metrics;
 
-import android.content.Context;
 import android.hardware.SensorEvent;
-import android.util.Log;
-
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by Alex on 4/26/2016.
  */
-public class MetricAvgAccelerationPer1Second extends Metric {
+public class MetricAvgAccelerationPer1Second extends MetricSensorBase {
     float[] valuesX = new float[1000];
     float[] valuesY = new float[1000];
     float[] valuesZ = new float[1000];
     volatile int n=0;
 
     @Override
-    public MetricObj getNewMetric() {
+    public MetricDataObj getNewMetric() {
 
         lock.lock();
 
@@ -28,7 +24,7 @@ public class MetricAvgAccelerationPer1Second extends Metric {
         avg = avg / n;
 
 
-        MetricObj metric = new MetricObj(n, avg);
+        MetricDataObj metric = new MetricDataObj(n, avg);
 
         n = 0;
         lock.unlock();
@@ -43,6 +39,7 @@ public class MetricAvgAccelerationPer1Second extends Metric {
         lock.unlock();
     }
 
+    @Override
     public void onSensorChanged(SensorEvent event) {
         if (state == State.ACTIVE) {
             lock.lock();

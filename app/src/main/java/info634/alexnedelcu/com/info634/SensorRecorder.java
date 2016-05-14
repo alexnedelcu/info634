@@ -1,32 +1,21 @@
 package info634.alexnedelcu.com.info634;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Build;
-import android.os.Bundle;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
-import android.widget.TextView;
 
 import java.lang.Thread;
 import java.util.ArrayList;
 import java.util.Date;
 
-import info634.alexnedelcu.com.info634.metrics.Metric;
 import info634.alexnedelcu.com.info634.metrics.MetricAvgAccelerationChangePer1Second;
 import info634.alexnedelcu.com.info634.metrics.MetricAvgAccelerationPer1Second;
 import info634.alexnedelcu.com.info634.metrics.MetricAvgRotationRatePer1Second;
-import info634.alexnedelcu.com.info634.metrics.MetricObj;
+import info634.alexnedelcu.com.info634.metrics.MetricBase;
+import info634.alexnedelcu.com.info634.metrics.MetricDataObj;
+import info634.alexnedelcu.com.info634.metrics.MetricSensorBase;
+import info634.alexnedelcu.com.info634.metrics.MetricSpeed;
 
 
 /**
@@ -44,17 +33,8 @@ public class SensorRecorder {
     private static String log="";
     static SensorRecorder.Command logUpdatingProcedure;
     private static String classificationLabel;
-    private LocationManager locationManager;
-    private LocationListener locationListener;
-    private double lat1 = 0.0;
-    private double lon1 = 0.0;
-    private double lat2 = 0.0;
-    private double lon2 = 0.0;
-    private double distance;
-    private int gpsRefreshRate = 1000; //in milliseconds
-    private double speed;
 
-    ArrayList<Metric> runningMetrics = new ArrayList<Metric>();
+    ArrayList<MetricBase> runningMetrics = new ArrayList<MetricBase>();
 
     public SensorRecorder (final Context context, String label) {
         this.classificationLabel = label;
@@ -71,67 +51,17 @@ public class SensorRecorder {
         runningMetrics.add(new MetricAvgAccelerationChangePer1Second());   // index 0
         runningMetrics.add(new MetricAvgAccelerationPer1Second());   // index 1
         runningMetrics.add(new MetricAvgRotationRatePer1Second());   //index 2
-
-        /**
-         * Add more metrics here
-         */
-
-        locationManager = (LocationManager) context.getSystemService(context.LOCATION_SERVICE);
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-
-               // Log.i("gps location" , location.getLatitude() + " " + location.getLongitude());
-
-                lat2 = location.getLatitude();
-                lon2 = location.getLongitude();
-
-                distance = distance(lat1, lon1, lat2, lon2, "M");
-                speed = distance / (gpsRefreshRate /1000);
-
-                //if (looping) {
-                    //addToLog("gps location" + location.getLatitude() + " " + location.getLongitude() + "\n");
-                    //addToLog("meters: " + lat1 + ","  + lon1 + "," + lat2 + "," + lon2+ "\n");
-                    addToLog("meters: " + distance + " speed m/s: " + speed +"\n");
-                //}
-                lat1 = lat2;
-                lon1 = lon2;
-            }
-
-            @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String s) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String s) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                 context.startActivity(intent);
-
-            }
-        };
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            /*if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                },10);
-            }*/
-            return;
-        }else{
-            startRecording();
-        }
+        runningMetrics.add(new MetricSpeed(context));   //index 3
 
     }
 
-    public void recordMetrics() {
-        mSensorManager.registerListener(runningMetrics.get(0), mAcc, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(runningMetrics.get(1), mAcc, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(runningMetrics.get(2), mGyro, SensorManager.SENSOR_DELAY_NORMAL);
+    /**
+     * Only need to bind sensors such as accelerometer, gyroscope, etc, except the GPS
+     */
+    public void bindSensorsToMetrics() {
+        mSensorManager.registerListener( (MetricSensorBase) runningMetrics.get(0), mAcc, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener( (MetricSensorBase) runningMetrics.get(1), mAcc, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener( (MetricSensorBase) runningMetrics.get(2), mGyro, SensorManager.SENSOR_DELAY_NORMAL);
 
         /**
          * Add more metrics here
@@ -200,12 +130,12 @@ public class SensorRecorder {
 
 
                         for (int i = 0; i < runningMetrics.size(); i++) { // iterate through all the classes that output metrics
-                            MetricObj m = runningMetrics.get(i).getNewMetric();
+                            MetricDataObj m = runningMetrics.get(i).getNewMetric();
                             if (m.numValues > 0) {
                                 // if there are  multiple metrics logged by one class, iterate through them
                                 for (int j=0; j<m.metric.size(); j++) {
                                     csvInstance += "," + m.metric.get(j);
-                                    log += ("  " + m.metric.get(j)).substring(0, 8);
+                                    log += ("  " + m.metric.get(j)).substring(0, Math.min(8, (""+m.metric.get(j)).length()-2));
                                 }
                             }
                         }
@@ -237,43 +167,7 @@ public class SensorRecorder {
     public interface Command {
         public void execute(final String s);
     }
-    protected void callGps() {
-
-    }
-    //@Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode){
-            case 10:
-                if(grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    startRecording();
-                    return;
-                }
-        }
-    }
-
-    private void startRecording(){
-        locationManager.requestLocationUpdates("gps", gpsRefreshRate, 0, locationListener);
-    }
 
 
-    private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
-        double theta = lon1 - lon2;
-        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
-        dist = Math.acos(dist);
-        dist = rad2deg(dist);
-        dist = dist * 60 * 1.1515;
-        if (unit == "K") {
-            dist = dist * 1.609344;
-        } else if (unit == "N") {
-            dist = dist * 0.8684;
-        }
-        return (dist);
-    }
-    private static double deg2rad(double deg) {
-        return (deg * Math.PI / 180.0);
-    }
-    private static double rad2deg(double rad) {
-        return (rad * 180 / Math.PI);
-    }
 
 }
