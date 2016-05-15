@@ -8,7 +8,7 @@ import java.util.ArrayList;
 /**
  * Created by Ross on 4/30/16.
  */
-public class MetricAvgRotationRatePer1Second extends MetricSensorBase {
+public class MetricAvgRotationRate extends MetricSensorBase {
     private static final float NS2S = 1.0f / 1000000000.0f;
     private final static double EPSILON = 0.00001;
     private final float[] deltaRotationVector = new float[4];

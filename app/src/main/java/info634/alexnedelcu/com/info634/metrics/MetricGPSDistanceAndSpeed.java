@@ -21,13 +21,13 @@ public class MetricGPSDistanceAndSpeed extends MetricBase implements LocationLis
 
     private LocationManager locationManager;
 
-    private double timeStart = new Date().getTime(), timeEnd;
+    private volatile double timeStart = new Date().getTime(), timeEnd;
     private double lat1 = 0.0;
     private double lon1 = 0.0;
     private double lat2 = 0.0;
     private double lon2 = 0.0;
-    private int countMeasurements = 0;
-    private double distance = 0;
+    private volatile int countMeasurements = 0;
+    private volatile double distance = 0;
 
 
     final Criteria criteria = new Criteria();
@@ -69,23 +69,25 @@ public class MetricGPSDistanceAndSpeed extends MetricBase implements LocationLis
     public void onLocationChanged(Location location) {
 
         if (state == State.ACTIVE) {
+            lock.lock();
 
             lat2 = location.getLatitude();
             lon2 = location.getLongitude();
 
             if (lon1 != 0.0 && lat1 != 0.0) {
                 distance += distance(lat1, lon1, lat2, lon2, "M");
-                System.out.println("Distance Updated : "+distance);
+//                System.out.println("Distance Updated : "+distance);
                 timeEnd = location.getTime();
-                countMeasurements++;
             } else {
-                System.out.println("Initial coordinates updated : "+lat2 + " "+lon2);
+                //System.out.println("Initial coordinates updated : "+lat2 + " "+lon2);
                 timeStart = location.getTime();
-                countMeasurements++;
             }
+
+            countMeasurements++;
 
             lat1 = lat2;
             lon1 = lon2;
+            lock.unlock();
 
         }
 
@@ -141,6 +143,8 @@ public class MetricGPSDistanceAndSpeed extends MetricBase implements LocationLis
     @Override
     public MetricDataObj getNewMetric() {
         ArrayList<Double> r = new ArrayList<Double>();
+
+        lock.lock();
         if (distance == 0.0) {
             r.add(0.0);
             r.add(0.0);
@@ -153,6 +157,7 @@ public class MetricGPSDistanceAndSpeed extends MetricBase implements LocationLis
 
         // remove  the data before the next iterval measurement
         clearData();
+        lock.unlock();
 
         return metric;
     }

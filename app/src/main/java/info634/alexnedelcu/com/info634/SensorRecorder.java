@@ -6,16 +6,19 @@ import android.hardware.SensorManager;
 import android.util.Log;
 
 import java.lang.Thread;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import info634.alexnedelcu.com.info634.metrics.MetricAvgAccelerationChangePer1Second;
-import info634.alexnedelcu.com.info634.metrics.MetricAvgAccelerationPer1Second;
-import info634.alexnedelcu.com.info634.metrics.MetricAvgRotationRatePer1Second;
+import info634.alexnedelcu.com.info634.metrics.MetricAvgAccelerationChange;
+import info634.alexnedelcu.com.info634.metrics.MetricAvgAcceleration;
+import info634.alexnedelcu.com.info634.metrics.MetricAvgLinearAcceleration;
+import info634.alexnedelcu.com.info634.metrics.MetricAvgLinearAccelerationChange;
+import info634.alexnedelcu.com.info634.metrics.MetricAvgRotationRate;
 import info634.alexnedelcu.com.info634.metrics.MetricBase;
 import info634.alexnedelcu.com.info634.metrics.MetricDataObj;
 import info634.alexnedelcu.com.info634.metrics.MetricSensorBase;
-import info634.alexnedelcu.com.info634.metrics.MetricSpeed;
+import info634.alexnedelcu.com.info634.metrics.MetricGPSDistanceAndSpeed;
 
 
 /**
@@ -24,8 +27,7 @@ import info634.alexnedelcu.com.info634.metrics.MetricSpeed;
 public class SensorRecorder {
 
     private SensorManager mSensorManager;
-    private Sensor mAcc;
-    private Sensor mGyro;
+    private Sensor mAcc, mGyro, mLinAcc;
     private Thread loop;
     private int loopingInterval = 1000;
     private boolean looping = false;
@@ -33,6 +35,7 @@ public class SensorRecorder {
     private static String log="";
     static SensorRecorder.Command logUpdatingProcedure;
     private static String classificationLabel;
+    private String headers;
 
     ArrayList<MetricBase> runningMetrics = new ArrayList<MetricBase>();
 
@@ -43,16 +46,22 @@ public class SensorRecorder {
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
             mAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             mGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+            mLinAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+
         }
 
         createLoop();
 
         // add the running metrics to the running metrics array
-        runningMetrics.add(new MetricAvgAccelerationChangePer1Second());   // index 0
-        runningMetrics.add(new MetricAvgAccelerationPer1Second());   // index 1
-        runningMetrics.add(new MetricAvgRotationRatePer1Second());   //index 2
-        runningMetrics.add(new MetricSpeed(context));   //index 3
+        runningMetrics.add(new MetricAvgAccelerationChange());   // index 0
+        runningMetrics.add(new MetricAvgAcceleration());   // index 1
+        runningMetrics.add(new MetricAvgRotationRate());   //index 2
+        runningMetrics.add(new MetricGPSDistanceAndSpeed(context));   //index 3
+        runningMetrics.add(new MetricAvgLinearAccelerationChange());   // index 4
+        runningMetrics.add(new MetricAvgLinearAcceleration());   // index 5
 
+
+        headers="Time,Label,AvgAccelerationChange,AvgAcceleration,AvgRotationX,AvgRotationY,AvgRotationZ,GPSDistance,Speed,AvgLinearAccelerationChange,AvgLinearAcceleration";
     }
 
     /**
@@ -62,6 +71,8 @@ public class SensorRecorder {
         mSensorManager.registerListener( (MetricSensorBase) runningMetrics.get(0), mAcc, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener( (MetricSensorBase) runningMetrics.get(1), mAcc, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener( (MetricSensorBase) runningMetrics.get(2), mGyro, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener( (MetricSensorBase) runningMetrics.get(4), mLinAcc, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener( (MetricSensorBase) runningMetrics.get(5), mLinAcc, SensorManager.SENSOR_DELAY_NORMAL);
 
         /**
          * Add more metrics here
@@ -85,7 +96,7 @@ public class SensorRecorder {
     }
 
     public String getCSV() {
-        return csv;
+        return headers+"\n"+csv;
     }
 
     public void clear() {
@@ -131,13 +142,15 @@ public class SensorRecorder {
 
                         for (int i = 0; i < runningMetrics.size(); i++) { // iterate through all the classes that output metrics
                             MetricDataObj m = runningMetrics.get(i).getNewMetric();
-                            if (m.numValues > 0) {
+                            //if (m.numValues > 0) {
                                 // if there are  multiple metrics logged by one class, iterate through them
                                 for (int j=0; j<m.metric.size(); j++) {
                                     csvInstance += "," + m.metric.get(j);
-                                    log += ("  " + m.metric.get(j)).substring(0, Math.min(8, (""+m.metric.get(j)).length()-2));
+
+                                    DecimalFormat df = new DecimalFormat("#.000");
+                                    log += "  " + df.format(m.metric.get(j));
                                 }
-                            }
+                            //}
                         }
 
 
