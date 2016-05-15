@@ -5,7 +5,7 @@ import android.hardware.SensorEvent;
 /**
  * Created by Alex on 4/26/2016.
  */
-public class MetricAvgAccelerationPer1Second extends MetricSensorBase {
+public class MetricAvgAccelerationPer extends MetricSensorBase {
     float[] valuesX = new float[1000];
     float[] valuesY = new float[1000];
     float[] valuesZ = new float[1000];

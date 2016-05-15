@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 
-public class MetricSpeed extends MetricBase implements LocationListener {
+public class MetricGPSDistanceAndSpeed extends MetricBase implements LocationListener {
 
     private LocationManager locationManager;
 
@@ -32,9 +32,9 @@ public class MetricSpeed extends MetricBase implements LocationListener {
 
     final Criteria criteria = new Criteria();
     Context context;
-    MetricSpeed instance;
+    MetricGPSDistanceAndSpeed instance;
 
-    public MetricSpeed(Context context) {
+    public MetricGPSDistanceAndSpeed(Context context) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions

@@ -6,7 +6,7 @@ import android.util.Log;
 /**
  * Created by Alex on 4/26/2016.
  */
-public class MetricAvgAccelerationChangePer1Second extends MetricSensorBase {
+public class MetricAvgAccelerationChange extends MetricSensorBase {
     float[] valuesX = new float[1000];
     float[] valuesY = new float[1000];
     float[] valuesZ = new float[1000];
@@ -21,7 +21,7 @@ public class MetricAvgAccelerationChangePer1Second extends MetricSensorBase {
         // creating the metric by taking the average of the values
         double avg = 0.0;
         for (int i = 0; i < n; i++) {
-            avg += Math.abs(valuesX[i]) + Math.abs(valuesY[i]) + Math.abs(valuesZ[i]);
+            avg += Math.sqrt(Math.pow(Math.abs(valuesX[i]), 2.0) + Math.pow(Math.abs(valuesY[i]), 2.0) + Math.pow(Math.abs(valuesZ[i]), 2.0));
         }
         avg = avg / n;
 
