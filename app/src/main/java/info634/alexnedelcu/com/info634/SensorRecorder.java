@@ -61,7 +61,7 @@ public class SensorRecorder {
         runningMetrics.add(new MetricAvgLinearAcceleration());   // index 5
 
 
-        headers="Time,Label,AvgAccelerationChange,AvgAcceleration,AvgRotationX,AvgRotationY,AvgRotationZ,GPSDistance,Speed,AvgLinearAccelerationChange,AvgLinearAcceleration";
+        headers="Interval,Time,Label,AvgAccelerationChange,AvgAcceleration,AvgRotationX,AvgRotationY,AvgRotationZ,GPSDistance,Speed,AvgLinearAccelerationChange,AvgLinearAcceleration";
     }
 
     /**
@@ -135,9 +135,9 @@ public class SensorRecorder {
 
                         long time = new Date().getTime()/1000%1000;
                         String log = "";
-                        log = ""+time+"  "+classificationLabel.substring(0,1).toUpperCase();
+                        log = loopingInterval+"  "+time+"  "+classificationLabel.substring(0,1).toUpperCase();
 
-                        csvInstance = time+","+classificationLabel.toUpperCase();
+                        csvInstance = loopingInterval+","+time+","+classificationLabel.toUpperCase();
 
 
                         for (int i = 0; i < runningMetrics.size(); i++) { // iterate through all the classes that output metrics
